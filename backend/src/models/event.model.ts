@@ -23,20 +23,15 @@ const eventSchema = new Schema(
 			enum: ["ongoing", "completed"],
 			required: true,
 		},
-		image: {
-			name: {
-				type: String,
-				required: true,
-			},
-			imagePath: {
-				type: String,
-				required: true,
-			},
-		},
 		createdBy: {
 			type: Types.ObjectId,
 			ref: "User",
 			required: true,
+		},
+		image: {
+			type: Types.ObjectId,
+			ref: "Image",
+			required: false,
 		},
 	},
 	{ timestamps: true }

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRouter from "./routes/auth.routes";
 import userRouter from "./routes/user.routes";
+import eventRouter from "./routes/event.routes";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const mongoURI: string = process.env.MONGO_URI || "";
 const app: Application = express();
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req: Request, res: Response) => {
 	res.send("Hello world");
@@ -19,6 +21,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/event", eventRouter);
 
 mongoose
 	.connect(mongoURI)

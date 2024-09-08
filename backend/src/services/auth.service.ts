@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model";
-import validator from "validator";
 import jwt, { Secret } from "jsonwebtoken";
 
 class AuthService {
@@ -15,7 +14,9 @@ class AuthService {
 			const isMatch = bcrypt.compareSync(password, foundUser.password);
 
 			if (isMatch) {
-				const secretKey: Secret = process.env.ACCESS_TOKEN_SECRET || "";
+				const secretKey: Secret =
+					process.env.ACCESS_TOKEN_SECRET ||
+					"56176a976ff3cd4bb3163ffb703a72f66fa68b9b13309f49bbc7aa8d23601d30264fe58d6158c17ab5bb406be555b9532f19a6c0ddb087e0d466fa9b64ab3701";
 				const token = jwt.sign(
 					{ _id: foundUser._id?.toString(), email: foundUser.email },
 					secretKey,
@@ -24,7 +25,7 @@ class AuthService {
 					}
 				);
 
-				return { email, token };
+				return { id: foundUser._id, email, token };
 			} else {
 				throw new Error("Password is not correct");
 			}
