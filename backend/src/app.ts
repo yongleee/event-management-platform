@@ -1,6 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import authRouter from "./routes/auth.routes";
+import userRouter from "./routes/user.routes";
 
 dotenv.config();
 
@@ -9,9 +11,14 @@ const mongoURI: string = process.env.MONGO_URI || "";
 
 const app: Application = express();
 
+app.use(express.json());
+
 app.get("/", (req: Request, res: Response) => {
 	res.send("Hello world");
 });
+
+app.use("/auth", authRouter);
+app.use("/user", userRouter);
 
 mongoose
 	.connect(mongoURI)
