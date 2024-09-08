@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRouter from "./routes/auth.routes";
 import userRouter from "./routes/user.routes";
 import eventRouter from "./routes/event.routes";
+import cors from "cors";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const mongoURI: string = process.env.MONGO_URI || "";
 
 const app: Application = express();
 
+app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 

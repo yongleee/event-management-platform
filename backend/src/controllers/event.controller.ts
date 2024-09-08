@@ -4,7 +4,7 @@ import Event from "../models/event.model";
 import Image from "../models/image.model";
 
 class EventController {
-	getEventByName = async (req: Request, res: Response) => {
+	getEventByStatus = async (req: Request, res: Response) => {
 		try {
 			res.status(200).json();
 		} catch (error: any) {
@@ -14,7 +14,7 @@ class EventController {
 
 	getEvents = async (req: Request, res: Response) => {
 		try {
-			const events = await Event.find({});
+			const events = await eventService.getEvents();
 			res.status(200).json(events);
 		} catch (error: any) {
 			res.status(400).json({ error: error.message });
@@ -39,17 +39,9 @@ class EventController {
 
 	createEvent = async (req: Request, res: Response) => {
 		try {
-			const { eventName, startDate, endDate, location, status, createdBy } =
-				req.body;
+			const { eventName, startDate, endDate, location, createdBy } = req.body;
 
-			if (
-				!eventName ||
-				!startDate ||
-				!endDate ||
-				!location ||
-				!status ||
-				!createdBy
-			) {
+			if (!eventName || !startDate || !endDate || !location || !createdBy) {
 				throw Error("All fields must be filled.");
 			}
 
@@ -58,7 +50,6 @@ class EventController {
 				startDate,
 				endDate,
 				location,
-				status,
 				createdBy
 			);
 

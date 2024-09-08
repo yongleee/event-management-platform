@@ -8,7 +8,7 @@ class AuthService {
 			const foundUser = await User.findOne({ email });
 
 			if (!foundUser) {
-				throw new Error("Name of user is not correct");
+				throw new Error("Email of user is not correct");
 			}
 
 			const isMatch = bcrypt.compareSync(password, foundUser.password);

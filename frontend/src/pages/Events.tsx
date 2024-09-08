@@ -8,42 +8,61 @@ import {
 	TableRow,
 	Paper,
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
+import { fetchEvents } from "../api/api";
+import EventEditModal from "../components/CreateEventModal";
 
-interface Data {
-	name: string;
-	age: number;
-	occupation: string;
+interface EventsType {
+	_id: string;
+	eventName: string;
+	startDate: string;
+	endDate: string;
+	location: string;
+	status: string;
 }
 
-// Sample data
-const rows: Data[] = [
-	{ name: "John Doe", age: 28, occupation: "Engineer" },
-	{ name: "Jane Smith", age: 34, occupation: "Designer" },
-	{ name: "Mark Johnson", age: 45, occupation: "Developer" },
-];
-
 const Events: React.FC = () => {
+	const { data, error, isLoading, isError } = useQuery<EventsType[], Error>({
+		queryKey: ["events"],
+		queryFn: fetchEvents,
+	});
+
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+
+	if (isError) {
+		return <div>Error: {error.message}</div>;
+	}
+
 	return (
-		<TableContainer component={Paper}>
-			<Table>
-				<TableHead>
-					<TableRow>
-						<TableCell>Name</TableCell>
-						<TableCell>Age</TableCell>
-						<TableCell>Occupation</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{rows.map((row, index) => (
-						<TableRow key={index}>
-							<TableCell>{row.name}</TableCell>
-							<TableCell>{row.age}</TableCell>
-							<TableCell>{row.occupation}</TableCell>
+		<>
+			<TableContainer component={Paper}>
+				<Table>
+					<TableHead>
+						<TableRow>
+							<TableCell>Event Name</TableCell>
+							<TableCell>Start Date</TableCell>
+							<TableCell>End Date</TableCell>
+							<TableCell>Location</TableCell>
+							<TableCell>Status</TableCell>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
-		</TableContainer>
+					</TableHead>
+					<TableBody>
+						{data?.map((row, index) => (
+							<TableRow key={index}>
+								<TableCell>{row.eventName}</TableCell>
+								<TableCell>{row.startDate}</TableCell>
+								<TableCell>{row.endDate}</TableCell>
+								<TableCell>{row.location}</TableCell>
+								<TableCell>{row.status}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+			<EventEditModal />
+		</>
 	);
 };
 

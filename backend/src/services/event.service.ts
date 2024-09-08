@@ -16,7 +16,6 @@ class EventService {
 		startDate: string,
 		endDate: string,
 		location: string,
-		status: string,
 		createdBy: string
 	) => {
 		const newEvent = await Event.create({
@@ -24,11 +23,27 @@ class EventService {
 			startDate: new Date(startDate),
 			endDate: new Date(endDate),
 			location,
-			status,
+			status: "ongoing",
 			createdBy,
 		});
 
 		return newEvent;
+	};
+
+	getEvents = async () => {
+		// const { _id, eventName, startDate, endDate, location, status, createdBy } =
+		const events = await Event.find(
+			{},
+			{
+				_id: 1,
+				eventName: 1,
+				startDate: 1,
+				endDate: 1,
+				location: 1,
+				status: 1,
+			}
+		);
+		return events;
 	};
 }
 

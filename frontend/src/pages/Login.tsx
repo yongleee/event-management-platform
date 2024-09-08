@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { TextField, Button, Typography } from "@mui/material";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { Button, TextField, Container, Typography } from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
+import { loginUser } from "../api/api.ts";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import ErrorSnackbar from "../components/ErrorSnackbar";
 
 interface LoginFormValues {
 	email: string;
 	password: string;
+}
+
+interface ErrorResponse {
+	error?: string; // Adjust according to your error response structure
 }
 
 const Login: React.FC = () => {
@@ -13,62 +22,74 @@ const Login: React.FC = () => {
 		handleSubmit,
 		formState: { errors },
 	} = useForm<LoginFormValues>();
-	const [isLoginError, setIsLoginError] = useState(false);
+	const navigate = useNavigate();
+	const [loginError, setLoginError] = useState("");
+	const [openError, setOpenError] = useState<boolean>(false);
 
-	const onSubmit = async (data: LoginFormValues) => {
-		// Replace this with your actual login logic
-		try {
-			const response = await fetch("/api/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data),
-			});
+	const handleError = (error: string) => {
+		setLoginError(error);
+		setOpenError(true);
+	};
 
-			if (!response.ok) {
-				throw new Error("Login failed");
+	const handleClose = () => {
+		setOpenError(false);
+	};
+
+	const mutation = useMutation({
+		mutationFn: (data: LoginFormValues) => loginUser(data.email, data.password),
+		onSuccess: (data) => {
+			navigate("/events");
+			localStorage.setItem("token", data.token);
+			localStorage.setItem("id", data.id);
+		},
+		onError: (error: AxiosError<ErrorResponse>) => {
+			if (error.response && error.response.data) {
+				const errorData = error.response.data;
+				handleError(errorData.error || "An unknown error occurred");
+			} else {
+				console.error("An error occurred:", error.message);
 			}
+		},
+	});
 
-			// Handle successful login (e.g., redirect to dashboard)
-			console.log("Login successful");
-		} catch (error) {
-			console.log(error.message);
-
-			setIsLoginError(true);
-		}
+	const onSubmit: SubmitHandler<LoginFormValues> = (data) => {
+		mutation.mutate(data);
 	};
 
 	return (
 		<>
-			<Typography variant="h3" align="center">
-				Login
-			</Typography>
-			<form onSubmit={handleSubmit(onSubmit)}>
-				<TextField
-					label="Email"
-					type="email"
-					fullWidth
-					margin="normal"
-					{...register("email", {
-						required: true,
-						pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-					})}
-					error={!!errors.email}
-					helperText={errors.email?.message}
-				/>
-				<TextField
-					label="Password"
-					type="password"
-					fullWidth
-					margin="normal"
-					{...register("password", { required: true })}
-					error={!!errors.password}
-					helperText={errors.password?.message}
-				/>
-				<Button type="submit" variant="contained" color="primary" fullWidth>
+			<Container maxWidth="xs">
+				<Typography variant="h4" gutterBottom>
 					Login
-				</Button>
-				{isLoginError && <Typography color="error">Login failed</Typography>}
-			</form>
+				</Typography>
+				<form onSubmit={handleSubmit(onSubmit)}>
+					<TextField
+						label="Email"
+						fullWidth
+						margin="normal"
+						{...register("email", { required: "Email is required" })}
+						error={!!errors.email}
+						helperText={errors.email?.message}
+					/>
+					<TextField
+						label="Password"
+						type="password"
+						fullWidth
+						margin="normal"
+						{...register("password", { required: "Password is required" })}
+						error={!!errors.password}
+						helperText={errors.password?.message}
+					/>
+					<Button type="submit" variant="contained" color="primary" fullWidth>
+						Login
+					</Button>
+				</form>
+				<ErrorSnackbar
+					open={openError}
+					message={loginError}
+					onClose={handleClose}
+				/>
+			</Container>
 		</>
 	);
 };
