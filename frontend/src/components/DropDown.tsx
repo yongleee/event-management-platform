@@ -18,6 +18,7 @@ interface Option {
 }
 
 const options: Option[] = [
+	{ value: "", label: "All" },
 	{ value: "completed", label: "Completed" },
 	{ value: "ongoing", label: "Ongoing" },
 ];

@@ -76,8 +76,12 @@ export const editEvent = async ({
 
 export const deleteEvent = async ({
 	eventId,
+	email,
+	password,
 }: {
 	eventId: string;
+	email: string;
+	password: string;
 }): Promise<void> => {
-	await axiosURL.put(`/event/delete-event/${eventId}`);
+	await axiosURL.put(`/event/delete-event/${eventId}`, { email, password });
 };

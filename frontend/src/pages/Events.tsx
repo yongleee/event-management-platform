@@ -81,7 +81,7 @@ const Events: React.FC = () => {
 									<EditEventModal {...row} />
 								</TableCell>
 								<TableCell align="center">
-									<DeleteButton eventId={row._id} />
+									<DeleteButton eventId={row._id} eventName={row.eventName} />
 								</TableCell>
 							</TableRow>
 						))}

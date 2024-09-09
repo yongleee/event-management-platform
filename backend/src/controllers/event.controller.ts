@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import eventService from "../services/event.service";
+import authService from "../services/auth.service";
 import Event from "../models/event.model";
 import Image from "../models/image.model";
 
@@ -100,19 +101,25 @@ class EventController {
 
 	deleteEvent = async (req: Request, res: Response) => {
 		try {
-			const eventId = req.params.id;
+			const { email, password } = req.body;
+			const user = await authService.loginUser(email, password);
+			if (user) {
+				const eventId = req.params.id;
 
-			const event = await Event.findById(eventId);
+				const event = await Event.findById(eventId);
 
-			if (!event) {
-				return res.status(404).json({ message: "Event not found" });
+				if (!event) {
+					return res.status(404).json({ message: "Event not found" });
+				}
+
+				if (event.image) {
+					await Image.findByIdAndDelete(event.image);
+				}
+
+				await Event.findByIdAndDelete(eventId);
+			} else {
+				return res.status(404).json({ message: "User not found" });
 			}
-
-			if (event.image) {
-				await Image.findByIdAndDelete(event.image);
-			}
-
-			await Event.findByIdAndDelete(eventId);
 
 			return res
 				.status(200)
