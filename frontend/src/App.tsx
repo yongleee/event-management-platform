@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Events from "./pages/Events";
 import Preview from "./pages/Preview";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import SignUp from "./pages/SignUp";
 
 function App() {
 	return (
@@ -11,9 +13,17 @@ function App() {
 			<BrowserRouter>
 				<Navbar />
 				<Routes>
+					<Route path="/" element={<Preview />} />
 					<Route path="/login" element={<Login />} />
-					<Route path="/events" element={<Events />} />
-					<Route path="/preview" element={<Preview />} />
+					<Route path="/signup" element={<SignUp />} />
+					<Route
+						path="/events"
+						element={<ProtectedRoute element={<Events />} />}
+					/>
+					<Route
+						path="/preview"
+						element={<ProtectedRoute element={<Preview />} />}
+					/>
 				</Routes>
 			</BrowserRouter>
 		</>

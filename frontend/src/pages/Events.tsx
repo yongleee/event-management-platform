@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -7,11 +7,15 @@ import {
 	TableHead,
 	TableRow,
 	Paper,
+	SelectChangeEvent,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEvents } from "../api/api";
 import CreateEventModal from "../components/CreateEventModal";
 import UploadImageForm from "../components/UploadImageModal";
+import Dropdown from "../components/DropDown";
+import EditEventModal from "../components/EditEventModal";
+import DeleteButton from "../components/DeleteButton";
 
 interface EventsType {
 	_id: string;
@@ -23,10 +27,16 @@ interface EventsType {
 }
 
 const Events: React.FC = () => {
+	const [filterStatus, setFilterStatus] = useState<string>("");
+
 	const { data, error, isLoading, isError } = useQuery<EventsType[], Error>({
-		queryKey: ["events"],
-		queryFn: fetchEvents,
+		queryKey: ["events", filterStatus],
+		queryFn: ({ queryKey }) => fetchEvents(queryKey[1] as string),
 	});
+
+	const handleChange = (event: SelectChangeEvent<string>) => {
+		setFilterStatus(event.target.value as string);
+	};
 
 	if (isLoading) {
 		return <div>Loading...</div>;
@@ -38,6 +48,7 @@ const Events: React.FC = () => {
 
 	return (
 		<>
+			<Dropdown handleChange={handleChange} filterStatus={filterStatus} />
 			<TableContainer component={Paper}>
 				<Table>
 					<TableHead>
@@ -48,7 +59,8 @@ const Events: React.FC = () => {
 							<TableCell align="center">Location</TableCell>
 							<TableCell align="center">Status</TableCell>
 							<TableCell align="center">Upload Thumbnail</TableCell>
-							<TableCell align="center">Functions</TableCell>
+							<TableCell align="center">Edit</TableCell>
+							<TableCell align="center">Delete</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -64,6 +76,12 @@ const Events: React.FC = () => {
 										eventId={row._id}
 										eventName={row.eventName}
 									/>
+								</TableCell>
+								<TableCell align="center">
+									<EditEventModal {...row} />
+								</TableCell>
+								<TableCell align="center">
+									<DeleteButton eventId={row._id} />
 								</TableCell>
 							</TableRow>
 						))}

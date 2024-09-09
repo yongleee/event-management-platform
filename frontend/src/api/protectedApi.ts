@@ -24,14 +24,14 @@ axiosURL.interceptors.request.use(
 	}
 );
 
-export interface EventPayload {
+export interface IEvent {
 	eventName: string;
 	startDate: string;
 	endDate: string;
 	location: string;
 }
 
-export interface EventReturn {
+export interface IEventWithStatus {
 	eventName: string;
 	startDate: string;
 	endDate: string;
@@ -40,8 +40,8 @@ export interface EventReturn {
 }
 
 export const createEvent = async (
-	newEvent: EventPayload
-): Promise<EventReturn> => {
+	newEvent: IEvent
+): Promise<IEventWithStatus> => {
 	const { data } = await axiosURL.post("/event/create-event", newEvent);
 	return data;
 };
@@ -51,11 +51,33 @@ export const createImage = async ({
 	data,
 }: {
 	eventId: string;
-	data: any;
+	data: FormData;
 }) => {
 	return axiosURL.post(`/event/create-image/${eventId}`, data, {
 		headers: {
 			"Content-Type": "multipart/form-data",
 		},
 	});
+};
+
+export const editEvent = async ({
+	eventId,
+	eventData,
+}: {
+	eventId: string;
+	eventData: IEventWithStatus;
+}): Promise<IEventWithStatus> => {
+	const { data } = await axiosURL.put(
+		`/event/edit-event/${eventId}`,
+		eventData
+	);
+	return data;
+};
+
+export const deleteEvent = async ({
+	eventId,
+}: {
+	eventId: string;
+}): Promise<void> => {
+	await axiosURL.put(`/event/delete-event/${eventId}`);
 };

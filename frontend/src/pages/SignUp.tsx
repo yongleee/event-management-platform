@@ -2,32 +2,38 @@ import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button, TextField, Container, Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
-import { loginUser } from "../api/api.ts";
+import { signUpUser } from "../api/api.ts";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import ErrorSnackbar from "../components/ErrorSnackbar";
 
-interface LoginFormValues {
+interface SignUpValues {
 	email: string;
 	password: string;
+}
+
+interface SignUpFormValues extends SignUpValues {
+	confirmPassword: string;
 }
 
 interface ErrorResponse {
 	error?: string;
 }
 
-const Login: React.FC = () => {
+const SignUp: React.FC = () => {
 	const {
 		register,
 		handleSubmit,
+		watch,
 		formState: { errors },
-	} = useForm<LoginFormValues>();
+	} = useForm<SignUpFormValues>();
 	const navigate = useNavigate();
-	const [loginError, setLoginError] = useState("");
+	const [signUpError, setSignUpError] = useState("");
 	const [openError, setOpenError] = useState<boolean>(false);
+	const password = watch("password");
 
 	const handleError = (error: string) => {
-		setLoginError(error);
+		setSignUpError(error);
 		setOpenError(true);
 	};
 
@@ -36,7 +42,7 @@ const Login: React.FC = () => {
 	};
 
 	const mutation = useMutation({
-		mutationFn: (data: LoginFormValues) => loginUser(data.email, data.password),
+		mutationFn: (data: SignUpValues) => signUpUser(data.email, data.password),
 		onSuccess: (data) => {
 			navigate("/events");
 			localStorage.setItem("token", data.token);
@@ -51,7 +57,7 @@ const Login: React.FC = () => {
 		},
 	});
 
-	const onSubmit: SubmitHandler<LoginFormValues> = (data) => {
+	const onSubmit: SubmitHandler<SignUpValues> = (data) => {
 		mutation.mutate(data);
 	};
 
@@ -59,7 +65,7 @@ const Login: React.FC = () => {
 		<>
 			<Container maxWidth="xs">
 				<Typography variant="h4" gutterBottom>
-					Login
+					Sign Up
 				</Typography>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<TextField
@@ -79,13 +85,26 @@ const Login: React.FC = () => {
 						error={!!errors.password}
 						helperText={errors.password?.message}
 					/>
+					<TextField
+						label="Confirm Password"
+						type="password"
+						fullWidth
+						margin="normal"
+						{...register("confirmPassword", {
+							required: "Confirm Password is required",
+							validate: (value) =>
+								value === password || "Passwords do not match",
+						})}
+						error={!!errors.confirmPassword}
+						helperText={errors.confirmPassword?.message}
+					/>
 					<Button type="submit" variant="contained" color="primary" fullWidth>
-						Login
+						Sign Up
 					</Button>
 				</form>
 				<ErrorSnackbar
 					open={openError}
-					message={loginError}
+					message={signUpError}
 					onClose={handleClose}
 				/>
 			</Container>
@@ -93,4 +112,4 @@ const Login: React.FC = () => {
 	);
 };
 
-export default Login;
+export default SignUp;

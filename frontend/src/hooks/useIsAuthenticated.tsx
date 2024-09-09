@@ -1,7 +1,5 @@
-import { useAuthToken } from "./useAuthToken";
+const useIsAuthenticated = () => {
+	return !!localStorage.getItem("token");
+};
 
-export function useIsAuthenticated() {
-	const { getToken } = useAuthToken();
-	const token = getToken();
-	return !!token;
-}
+export default useIsAuthenticated;

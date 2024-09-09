@@ -14,11 +14,20 @@ class EventController {
 	};
 
 	getEvents = async (req: Request, res: Response) => {
-		const { status } = req.body;
+		const status: string | undefined = req.query.status as string;
 
 		const statusFilter = status ? status : "";
 		try {
 			const events = await eventService.getEvents(statusFilter);
+			res.status(200).json(events);
+		} catch (error: any) {
+			res.status(400).json({ error: error.message });
+		}
+	};
+
+	getEventsWithImages = async (req: Request, res: Response) => {
+		try {
+			const events = await eventService.getEventsWithImages();
 			res.status(200).json(events);
 		} catch (error: any) {
 			res.status(400).json({ error: error.message });

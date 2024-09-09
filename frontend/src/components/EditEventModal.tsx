@@ -1,7 +1,19 @@
 import React, { useState } from "react";
-import { Button, Modal, Box, TextField, Typography } from "@mui/material";
+import {
+	Button,
+	Modal,
+	Box,
+	TextField,
+	Typography,
+	MenuItem,
+	Select,
+	InputLabel,
+	FormControl,
+	IconButton,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { createEvent, IEvent, IEventWithStatus } from "../api/protectedApi";
+import { editEvent } from "../api/protectedApi";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -16,16 +28,19 @@ interface IFormInput {
 	status: string;
 }
 
-const CreateEventModal: React.FC = () => {
-	const today = dayjs();
+interface EditEventModalProps extends IFormInput {
+	_id: string;
+}
+
+const EditEventModal: React.FC<EditEventModalProps> = (props) => {
 	const queryClient = useQueryClient();
 
 	const [open, setOpen] = useState(false);
 	const [maxDate, setMaxDate] = useState<Dayjs>();
 	const [minDate, setMinDate] = useState<Dayjs>();
 
-	const mutation = useMutation<IEventWithStatus, Error, IEvent>({
-		mutationFn: createEvent,
+	const mutation = useMutation({
+		mutationFn: editEvent,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["events"] });
 		},
@@ -42,16 +57,16 @@ const CreateEventModal: React.FC = () => {
 	const handleClose = () => setOpen(false);
 
 	const onSubmit: SubmitHandler<IFormInput> = (data) => {
-		const { eventName, startDate, endDate, location } = data;
-		mutation.mutate({ eventName, startDate, endDate, location });
+		const eventId = props._id;
+		mutation.mutate({ eventId, eventData: data });
 		handleClose();
 	};
 
 	return (
-		<div>
-			<Button variant="contained" onClick={handleOpen}>
-				Add an Event
-			</Button>
+		<>
+			<IconButton color="secondary" onClick={handleOpen}>
+				<EditIcon />
+			</IconButton>
 
 			<Modal
 				open={open}
@@ -73,7 +88,7 @@ const CreateEventModal: React.FC = () => {
 					}}
 				>
 					<Typography id="modal-modal-title" variant="h6" component="h2">
-						Create an event:
+						Edit event:
 					</Typography>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<TextField
@@ -84,11 +99,12 @@ const CreateEventModal: React.FC = () => {
 							{...register("eventName", { required: "Event Name is required" })}
 							error={!!errors.eventName}
 							helperText={errors.eventName ? errors.eventName.message : ""}
+							defaultValue={props.eventName}
 						/>
 						<Controller
 							name="startDate"
 							control={control}
-							defaultValue={today.format("YYYY-MM-DD")}
+							defaultValue={props.startDate}
 							rules={{ required: "Date is required" }}
 							render={({ field }) => (
 								<LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -117,7 +133,7 @@ const CreateEventModal: React.FC = () => {
 						<Controller
 							name="endDate"
 							control={control}
-							defaultValue={today.format("YYYY-MM-DD")}
+							defaultValue={props.endDate}
 							rules={{ required: "Date is required" }}
 							render={({ field }) => (
 								<LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -151,16 +167,34 @@ const CreateEventModal: React.FC = () => {
 							{...register("location", { required: "Location is required" })}
 							error={!!errors.location}
 							helperText={errors.location ? errors.location.message : ""}
+							defaultValue={props.location}
 						/>
-
+						<FormControl fullWidth margin="normal">
+							<InputLabel id="dropdown-label">Status</InputLabel>
+							<Controller
+								name="status"
+								control={control}
+								defaultValue={props.status}
+								render={({ field }) => (
+									<Select
+										{...field}
+										labelId="dropdown-label"
+										label="Select an option"
+									>
+										<MenuItem value="ongoing">Ongoing</MenuItem>
+										<MenuItem value="completed">Completed</MenuItem>
+									</Select>
+								)}
+							/>
+						</FormControl>
 						<Button type="submit" variant="contained" color="primary" fullWidth>
 							Submit
 						</Button>
 					</form>
 				</Box>
 			</Modal>
-		</div>
+		</>
 	);
 };
 
-export default CreateEventModal;
+export default EditEventModal;
