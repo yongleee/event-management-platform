@@ -40,7 +40,6 @@ const Login: React.FC = () => {
 		onSuccess: (data) => {
 			navigate("/events");
 			localStorage.setItem("token", data.token);
-			localStorage.setItem("id", data.id);
 		},
 		onError: (error: AxiosError<ErrorResponse>) => {
 			if (error.response && error.response.data) {

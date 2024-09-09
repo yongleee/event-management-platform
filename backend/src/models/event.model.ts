@@ -26,7 +26,7 @@ const eventSchema = new Schema(
 		createdBy: {
 			type: Types.ObjectId,
 			ref: "User",
-			required: true,
+			required: false,
 		},
 		image: {
 			type: Types.ObjectId,

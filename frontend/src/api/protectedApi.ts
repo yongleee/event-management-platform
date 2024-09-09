@@ -24,19 +24,38 @@ axiosURL.interceptors.request.use(
 	}
 );
 
+export interface EventPayload {
+	eventName: string;
+	startDate: string;
+	endDate: string;
+	location: string;
+}
+
+export interface EventReturn {
+	eventName: string;
+	startDate: string;
+	endDate: string;
+	location: string;
+	status: string;
+}
+
 export const createEvent = async (
-	eventName: string,
-	startDate: string,
-	endDate: string,
-	location: string,
-	createdBy: string
-) => {
-	const { data } = await axiosURL.post("/event/create-event", {
-		eventName,
-		startDate,
-		endDate,
-		location,
-		createdBy,
-	});
+	newEvent: EventPayload
+): Promise<EventReturn> => {
+	const { data } = await axiosURL.post("/event/create-event", newEvent);
 	return data;
+};
+
+export const createImage = async ({
+	eventId,
+	data,
+}: {
+	eventId: string;
+	data: any;
+}) => {
+	return axiosURL.post(`/event/create-image/${eventId}`, data, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
 };

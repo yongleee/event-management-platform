@@ -5,6 +5,7 @@ import Image from "../models/image.model";
 
 class EventController {
 	getEventByStatus = async (req: Request, res: Response) => {
+		const { status } = req.body;
 		try {
 			res.status(200).json();
 		} catch (error: any) {
@@ -13,8 +14,11 @@ class EventController {
 	};
 
 	getEvents = async (req: Request, res: Response) => {
+		const { status } = req.body;
+
+		const statusFilter = status ? status : "";
 		try {
-			const events = await eventService.getEvents();
+			const events = await eventService.getEvents(statusFilter);
 			res.status(200).json(events);
 		} catch (error: any) {
 			res.status(400).json({ error: error.message });
@@ -22,16 +26,15 @@ class EventController {
 	};
 
 	createImage = async (req: Request, res: Response) => {
+		const { id } = req.params;
+
 		try {
 			if (!req.file) {
 				throw Error("All fields must be filled.");
 			}
-
 			const { filename, path } = req.file;
-
-			const image = await eventService.createNewImage(filename, path);
-
-			res.status(200).json({ image });
+			const updatedUser = await eventService.createNewImage(id, filename, path);
+			res.status(200).json({ updatedUser });
 		} catch (error: any) {
 			res.status(400).json({ error: error.message });
 		}
@@ -39,9 +42,9 @@ class EventController {
 
 	createEvent = async (req: Request, res: Response) => {
 		try {
-			const { eventName, startDate, endDate, location, createdBy } = req.body;
+			const { eventName, startDate, endDate, location } = req.body;
 
-			if (!eventName || !startDate || !endDate || !location || !createdBy) {
+			if (!eventName || !startDate || !endDate || !location) {
 				throw Error("All fields must be filled.");
 			}
 
@@ -49,8 +52,7 @@ class EventController {
 				eventName,
 				startDate,
 				endDate,
-				location,
-				createdBy
+				location
 			);
 
 			res.status(200).json(newEvent);

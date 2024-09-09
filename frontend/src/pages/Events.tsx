@@ -10,7 +10,8 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEvents } from "../api/api";
-import EventEditModal from "../components/CreateEventModal";
+import CreateEventModal from "../components/CreateEventModal";
+import UploadImageForm from "../components/UploadImageModal";
 
 interface EventsType {
 	_id: string;
@@ -41,27 +42,35 @@ const Events: React.FC = () => {
 				<Table>
 					<TableHead>
 						<TableRow>
-							<TableCell>Event Name</TableCell>
-							<TableCell>Start Date</TableCell>
-							<TableCell>End Date</TableCell>
-							<TableCell>Location</TableCell>
-							<TableCell>Status</TableCell>
+							<TableCell align="center">Event Name</TableCell>
+							<TableCell align="center">Start Date</TableCell>
+							<TableCell align="center">End Date</TableCell>
+							<TableCell align="center">Location</TableCell>
+							<TableCell align="center">Status</TableCell>
+							<TableCell align="center">Upload Thumbnail</TableCell>
+							<TableCell align="center">Functions</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{data?.map((row, index) => (
 							<TableRow key={index}>
-								<TableCell>{row.eventName}</TableCell>
-								<TableCell>{row.startDate}</TableCell>
-								<TableCell>{row.endDate}</TableCell>
-								<TableCell>{row.location}</TableCell>
-								<TableCell>{row.status}</TableCell>
+								<TableCell align="center">{row.eventName}</TableCell>
+								<TableCell align="center">{row.startDate}</TableCell>
+								<TableCell align="center">{row.endDate}</TableCell>
+								<TableCell align="center">{row.location}</TableCell>
+								<TableCell align="center">{row.status}</TableCell>
+								<TableCell align="center">
+									<UploadImageForm
+										eventId={row._id}
+										eventName={row.eventName}
+									/>
+								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
 				</Table>
 			</TableContainer>
-			<EventEditModal />
+			<CreateEventModal />
 		</>
 	);
 };

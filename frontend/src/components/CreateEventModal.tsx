@@ -1,25 +1,36 @@
 import React, { useState } from "react";
 import { Button, Modal, Box, TextField, Typography } from "@mui/material";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { createEvent } from "../api/protectedApi";
+import { createEvent, EventPayload, EventReturn } from "../api/protectedApi";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface IFormInput {
 	eventName: string;
 	startDate: string;
 	endDate: string;
 	location: string;
+	status: string;
 }
 
 const CreateEventModal: React.FC = () => {
 	const today = dayjs();
+	const queryClient = useQueryClient();
 
 	const [open, setOpen] = useState(false);
 	const [maxDate, setMaxDate] = useState<Dayjs>();
 	const [minDate, setMinDate] = useState<Dayjs>();
+
+	const mutation = useMutation<EventReturn, Error, EventPayload>({
+		mutationFn: createEvent,
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey: ["events"] });
+		},
+	});
 
 	const {
 		register,
@@ -33,10 +44,8 @@ const CreateEventModal: React.FC = () => {
 
 	// Handle form submission
 	const onSubmit: SubmitHandler<IFormInput> = (data) => {
-		const createdBy: string = localStorage.getItem("id") || "";
 		const { eventName, startDate, endDate, location } = data;
-		createEvent(eventName, startDate, endDate, location, createdBy);
-
+		mutation.mutate({ eventName, startDate, endDate, location });
 		handleClose();
 	};
 
